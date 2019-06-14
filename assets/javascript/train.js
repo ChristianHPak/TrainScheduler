@@ -12,20 +12,19 @@ firebase.initializeApp(firebaseConfig);
 
 var database = firebase.database();
 
-database.ref().on("child_added", function (ChildSnapshot) {
+database.ref().on("child_added", function (childSnapshot) {
+    
+    var timeArray = TrainStart.split(":");
+    var trainTime = moment().hours(timeArray[0]).minutes(timeArray[1]);
+    var ArrivalTime = moment.max(moment(), trainTime);
+    var TrainMin;
+    var nextTrain;
 
     var TrainName = childSnapshot.val().TrainName;
     var TrainDestination = childSnapshot.val().TrainDestination;
     var TrainFrequency = childSnapshot.val().TrainFrequency;
     var TrainStart = childSnapshot.val().TrainStart;
 
-    var timeArray = tFirstTrain.split(":");
-    var trainTime = moment()
-        .hours(timeArray[0])
-        .minutes(timeArray[1]);
-    var ArrivalTime = moment.max(moment(), trainTime);
-    var TrainMin;
-    var nextTrain;
 
     if (ArrivalTime === trainTime) {
         nextTrain = trainTime.format("hh:mm A");
@@ -37,7 +36,7 @@ database.ref().on("child_added", function (ChildSnapshot) {
         TrainMin = TrainFrequency - TrainRemainder;
 
         nextTrain = moment()
-            .add(tMinutes, "m")
+            .add(TrainMin, "m")
             .format("hh:mm A");
     }
 
@@ -53,7 +52,7 @@ $("#Employee-Submit").on("click", function (event) {
     var TrainName = $("#Train-Name").val().trim();
     var TrainDestination = $("#Train-Destination").val().trim();
     var TrainStart = moment($("#Train-Start").val()).format('L');
-    var TrainFrequency = parseInt($("#Train-Frequency").val());
+    var TrainFrequency = $("#Train-Frequency").val();
 
     //saves info in database
     database.ref().push({
