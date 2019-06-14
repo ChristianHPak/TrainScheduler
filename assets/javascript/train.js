@@ -14,8 +14,34 @@ var database = firebase.database();
 
 database.ref().on("child_added", function (ChildSnapshot) {
 
-    $("tbody").append("<tr>" + "<th scope='col'> " + ChildSnapshot.val().EmployeeName + "<td scope='col'>" + ChildSnapshot.val().EmployeeRole + "<td scope='col'>" + ChildSnapshot.val().EmployeeStartDate + "<td scope='col'>" + ChildSnapshot.val().MonthsWorked + " Month(s)" + "<td scope='col'>" + ChildSnapshot.val().EmployeeMonthlyRate + "<td scope='col'> $" + ChildSnapshot.val().TotalBilled)
+    var TrainName = childSnapshot.val().TrainName;
+    var TrainDestination = childSnapshot.val().TrainDestination;
+    var TrainFrequency = childSnapshot.val().TrainFrequency;
+    var TrainStart = childSnapshot.val().TrainStart;
 
+    var timeArray = tFirstTrain.split(":");
+    var trainTime = moment()
+        .hours(timeArray[0])
+        .minutes(timeArray[1]);
+    var ArrivalTime = moment.max(moment(), trainTime);
+    var TrainMin;
+    var nextTrain;
+
+    if (ArrivalTime === trainTime) {
+        nextTrain = trainTime.format("hh:mm A");
+        TrainMin = trainTime.diff(moment(), "minutes");
+    } else {
+
+        var TimeDifference = moment().diff(trainTime, "minutes");
+        var TrainRemainder = TimeDifference % TrainFrequency;
+        TrainMin = TrainFrequency - TrainRemainder;
+
+        nextTrain = moment()
+            .add(tMinutes, "m")
+            .format("hh:mm A");
+    }
+
+    $("tbody").append("<tr>" + "<th scope='col'> " + TrainName + "<td scope='col'>" + TrainDestination + "<td scope='col'>" + TrainFrequency + " Minute(s)" + "<td scope='col'>" + nextTrain + "<td scope='col'>" + TrainMin) + "</td></tr>";
 
 }, function (errorObj) {
     console.log("Errors handled: " + errorObj.code)
@@ -24,24 +50,17 @@ database.ref().on("child_added", function (ChildSnapshot) {
 $("#Employee-Submit").on("click", function (event) {
     event.preventDefault();
 
-    var todaysdate = moment()
-
-    var EmployeeName = $("#Employee-Name").val().trim();
-    var EmployeeRole = $("#Employee-Role").val().trim();
-    var EmployeeStartDate = moment($("#Employee-StartDate").val()).format('L');
-    var EmployeeMonthlyRate = parseInt($("#Employee-MonthlyRate").val());
-
-    var MonthsWorked = moment().diff(EmployeeStartDate, 'month')
-    var TotalBilled = (MonthsWorked * EmployeeMonthlyRate);
+    var TrainName = $("#Train-Name").val().trim();
+    var TrainDestination = $("#Train-Destination").val().trim();
+    var TrainStart = moment($("#Train-Start").val()).format('L');
+    var TrainFrequency = parseInt($("#Train-Frequency").val());
 
     //saves info in database
     database.ref().push({
-        EmployeeName: EmployeeName,
-        EmployeeRole: EmployeeRole,
-        EmployeeMonthlyRate: EmployeeMonthlyRate,
-        EmployeeStartDate: EmployeeStartDate,
-        MonthsWorked: MonthsWorked,
-        TotalBilled: TotalBilled
+        TrainName: TrainName,
+        TrainDestination: TrainDestination,
+        TrainStart: TrainStart,
+        TrainFrequency: TrainFrequency,
     });
 
     $("input").val("")
