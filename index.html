@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    <meta charset="UTF-8">
+    <title>TimeSheet Group Activity</title>
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <!-- Bootstrap CDN-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <!-- Firebase References -->
+    <script src="https://www.gstatic.com/firebasejs/6.0.4/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/6.0.4/firebase-database.js"></script>
+    <!-- moment.js -->
+    <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <div>Current Employees</div>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead class="thead-light">
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Role</th>
+                            <th scope="col">Start Date</th>
+                            <th scope="col">Months Worked</th>
+                            <th scope="col">Montly Rate</th>
+                            <th scope="col">Total Billed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="card mt-5">
+                <div class="card-header">
+                    <div>Add Employee</div>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="Name">Employee Name</label>
+                            <input type="name" class="form-control" id="Employee-Name" placeholder="Enter Name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Role">Role</label>
+                            <input type="text" class="form-control" id="Employee-Role" placeholder="CEO">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="StartDate">Start Date (MM/DD/YYYY)</label>
+                            <input type="date" class="form-control" id="Employee-StartDate" placeholder="Start Date">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="MonthlyRate">Monthly Rate</label>
+                            <input type="number" class="form-control" id="Employee-MonthlyRate" placeholder="20000">
+                        </div>
+
+                        <button id="Employee-Submit" type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Script -->
+        <script src="logic.js"></script>
+</body>
+
+</html>
