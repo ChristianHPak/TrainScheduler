@@ -12,62 +12,60 @@ firebase.initializeApp(firebaseConfig);
 
 var database = firebase.database();
 
-$("#Employee-Submit").on("click", function (event) {
-    event.preventDefault();
+    // Variables for the onClick event
+    var name;
+    var destination;
+    var firstTrain;
+    var frequency = 0;
 
-    var TrainName = $("#Train-Name").val().trim();
-    var TrainDestination = $("#Train-Destination").val().trim();
-    var TrainStart = ($("#Train-Start").val())
-    var TrainFrequency = $("#Train-Frequency").val();
+    $("#add-train").on("click", function() {
+        event.preventDefault();
+        // Storing and retreiving new train data
+        name = $("#train-name").val().trim();
+        destination = $("#destination").val().trim();
+        firstTrain = $("#first-train").val().trim();
+        frequency = $("#frequency").val().trim();
 
-    //saves info in database
-    database.ref().push({
-        TrainName: TrainName,
-        TrainDestination: TrainDestination,
-        TrainStart: TrainStart,
-        TrainFrequency: TrainFrequency,
+        // Pushing to database
+        database.ref().push({
+            name: name,
+            destination: destination,
+            firstTrain: firstTrain,
+            frequency: frequency,
+            dateAdded: firebase.database.ServerValue.TIMESTAMP
+        });
+        $("form")[0].reset();
     });
 
-    $("input").val("")
-});
+    database.ref().on("child_added", function(childSnapshot) {
+        var nextArr;
+        var minAway;
+        // Chang year so first train comes before now
+        var firstTrainNew = moment(childSnapshot.val().firstTrain, "hh:mm").subtract(1, "years");
+        // Difference between the current and firstTrain
+        var diffTime = moment().diff(moment(firstTrainNew), "minutes");
+        var remainder = diffTime % childSnapshot.val().frequency;
+        // Minutes until next train
+        var minAway = childSnapshot.val().frequency - remainder;
+        // Next train time
+        var nextTrain = moment().add(minAway, "minutes");
+        nextTrain = moment(nextTrain).format("hh:mm");
 
-database.ref().on("child_added", function (childSnapshot) {
+        $("#add-row").append("<tr><td>" + childSnapshot.val().name +
+                "</td><td>" + childSnapshot.val().destination +
+                "</td><td>" + childSnapshot.val().frequency +
+                "</td><td>" + nextTrain + 
+                "</td><td>" + minAway + "</td></tr>");
 
-    
-    var TrainName = childSnapshot.val().TrainName;
-    var TrainDestination = childSnapshot.val().TrainDestination;
-    var TrainFrequency = childSnapshot.val().TrainFrequency;
-    var TrainStart = childSnapshot.val().TrainStart;
-    
-    var timeArray = TrainStart.split(":");
-    var trainTime = moment().hours(timeArray[0]).minutes(timeArray[1]);
-    var ArrivalTime = moment.max(moment(), trainTime);
-    var TrainMin;
-    var nextTrain;
-    
-    if (ArrivalTime === trainTime) {
-        nextTrain = trainTime.format("hh:mm A");
-        TrainMin = trainTime.diff(moment(), "minutes");
-    } else {
+            // Handle the errors
+        }, function(errorObject) {
+            console.log("Errors handled: " + errorObject.code);
+    });
 
-        var TimeDifference = moment().diff(trainTime, "minutes");
-        var TrainRemainder = TimeDifference % TrainFrequency;
-        TrainMin = TrainFrequency - TrainRemainder;
-
-        nextTrain = moment()
-            .add(TrainMin, "m")
-            .format("hh:mm A");
-    }
-
-    $("#train-table > tbody").append(
-        $("<tr>").append(
-          $("<td>").text(TrainName),
-          $("<td>").text(TrainDestination),
-          $("<td>").text(TrainFrequency),
-          $("<td>").text(ArrivalTime),
-          $("<td>").text(nextTrain)
-        )
-      );
-}, function (errorObj) {
-    console.log("Errors handled: " + errorObj.code)
-});
+    database.ref().orderByChild("dateAdded").limitToLast(1).on("child_added", function(snapshot) {
+        // Change the HTML to reflect
+        $("#name-display").html(snapshot.val().name);
+        $("#email-display").html(snapshot.val().email);
+        $("#age-display").html(snapshot.val().age);
+        $("#comment-display").html(snapshot.val().comment);
+    });
