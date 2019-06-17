@@ -12,20 +12,39 @@ firebase.initializeApp(firebaseConfig);
 
 var database = firebase.database();
 
+$("#Employee-Submit").on("click", function (event) {
+    event.preventDefault();
+
+    var TrainName = $("#Train-Name").val().trim();
+    var TrainDestination = $("#Train-Destination").val().trim();
+    var TrainStart = ($("#Train-Start").val())
+    var TrainFrequency = $("#Train-Frequency").val();
+
+    //saves info in database
+    database.ref().push({
+        TrainName: TrainName,
+        TrainDestination: TrainDestination,
+        TrainStart: TrainStart,
+        TrainFrequency: TrainFrequency,
+    });
+
+    $("input").val("")
+});
+
 database.ref().on("child_added", function (childSnapshot) {
+
+    
+    var TrainName = childSnapshot.val().TrainName;
+    var TrainDestination = childSnapshot.val().TrainDestination;
+    var TrainFrequency = childSnapshot.val().TrainFrequency;
+    var TrainStart = childSnapshot.val().TrainStart;
     
     var timeArray = TrainStart.split(":");
     var trainTime = moment().hours(timeArray[0]).minutes(timeArray[1]);
     var ArrivalTime = moment.max(moment(), trainTime);
     var TrainMin;
     var nextTrain;
-
-    var TrainName = childSnapshot.val().TrainName;
-    var TrainDestination = childSnapshot.val().TrainDestination;
-    var TrainFrequency = childSnapshot.val().TrainFrequency;
-    var TrainStart = childSnapshot.val().TrainStart;
-
-
+    
     if (ArrivalTime === trainTime) {
         nextTrain = trainTime.format("hh:mm A");
         TrainMin = trainTime.diff(moment(), "minutes");
@@ -40,27 +59,15 @@ database.ref().on("child_added", function (childSnapshot) {
             .format("hh:mm A");
     }
 
-    $("tbody").append("<tr>" + "<th scope='col'> " + TrainName + "<td scope='col'>" + TrainDestination + "<td scope='col'>" + TrainFrequency + " Minute(s)" + "<td scope='col'>" + nextTrain + "<td scope='col'>" + TrainMin) + "</td></tr>";
-
+    $("#train-table > tbody").append(
+        $("<tr>").append(
+          $("<td>").text(TrainName),
+          $("<td>").text(TrainDestination),
+          $("<td>").text(TrainFrequency),
+          $("<td>").text(ArrivalTime),
+          $("<td>").text(nextTrain)
+        )
+      );
 }, function (errorObj) {
     console.log("Errors handled: " + errorObj.code)
-});
-
-$("#Employee-Submit").on("click", function (event) {
-    event.preventDefault();
-
-    var TrainName = $("#Train-Name").val().trim();
-    var TrainDestination = $("#Train-Destination").val().trim();
-    var TrainStart = moment($("#Train-Start").val()).format('L');
-    var TrainFrequency = $("#Train-Frequency").val();
-
-    //saves info in database
-    database.ref().push({
-        TrainName: TrainName,
-        TrainDestination: TrainDestination,
-        TrainStart: TrainStart,
-        TrainFrequency: TrainFrequency,
-    });
-
-    $("input").val("")
 });
